@@ -159,6 +159,59 @@ async def get_yield_predictions():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error predicting yields: {str(e)}")
 
+@app.get("/historical/{protocol}")
+async def get_historical_yields(protocol: str, days: int = 30):
+    """
+    Get historical yield data for a specific protocol
+    
+    Args:
+        protocol: Protocol name (Aave, Morpho, Spark, Uniswap)
+        days: Number of days of historical data (default 30)
+    
+    Returns:
+        Historical yield data with timestamps
+    """
+    try:
+        from fetch_data import fetch_historical_yield
+        import pandas as pd
+        
+        # Validate protocol name (case-insensitive)
+        valid_protocols = ["Aave", "Morpho", "Spark", "Uniswap"]
+        protocol_capitalized = protocol.capitalize()
+        
+        if protocol_capitalized not in valid_protocols:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid protocol '{protocol}'. Must be one of: {', '.join(valid_protocols)}"
+            )
+        
+        # Fetch historical data
+        historical_yields = fetch_historical_yield(protocol_capitalized, days)
+        
+        # Create timestamps for the data
+        end_date = pd.Timestamp.now()
+        dates = [end_date - pd.Timedelta(days=i) for i in range(days-1, -1, -1)]
+        
+        return {
+            "protocol": protocol_capitalized,
+            "data": [
+                {
+                    "date": date.isoformat(),
+                    "yield": float(yield_value)
+                }
+                for date, yield_value in zip(dates, historical_yields)
+            ],
+            "days": days
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error fetching historical yields: {str(e)}"
+        )
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -167,5 +220,3 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
