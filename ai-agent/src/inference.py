@@ -3,12 +3,32 @@ inference.py
 AI inference functions for yield prediction and risk analysis
 Loads trained models and makes predictions
 """
+"""
+inference.py
+AI inference functions for yield prediction and risk analysis
+Loads trained models and makes predictions
+"""
 import pickle
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import Dict, Tuple
-from fetch_data import fetch_protocol_metrics
+
+# Fix the relative import - THIS IS THE KEY FIX
+try:
+    from .fetch_data import fetch_protocol_metrics
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    from pathlib import Path
+    
+    # Add parent directory to path
+    current_dir = Path(__file__).parent
+    sys.path.insert(0, str(current_dir))
+    
+    from fetch_data import fetch_protocol_metrics
+
+# Rest of your code stays the same...
 
 PROTOCOL_ENCODING = {
     "Aave": 0,

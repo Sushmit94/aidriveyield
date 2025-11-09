@@ -3,11 +3,31 @@ main.py
 FastAPI server exposing AI endpoints for yield prediction and allocation recommendations
 Frontend and StrategyManager (via oracle) can call these endpoints
 """
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Optional
-import inference
+
+# Fix the relative import - THIS IS THE KEY FIX
+try:
+    from . import inference
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    from pathlib import Path
+    
+    # Add current directory to path
+    current_dir = Path(__file__).parent
+    sys.path.insert(0, str(current_dir))
+    
+    import inference
+
+# Fix the import - use relative import
+try:
+    from . import inference  # When running as module
+except ImportError:
+    import inference 
 
 app = FastAPI(
     title="AI Yield Allocation Service",
@@ -18,8 +38,11 @@ app = FastAPI(
 # CORS middleware for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ "http://localhost:3000",
-        "https://*.vercel.app"],  # In production, specify frontend domain
+     allow_origins=[
+        "http://localhost:3000",
+        "https://*.vercel.app",
+        "*"  # Remove this in production, specify your Vercel URL
+    ],  # In production, specify frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
