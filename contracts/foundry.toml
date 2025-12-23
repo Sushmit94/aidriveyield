@@ -1,0 +1,20 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+evm_version = "paris"
+
+[profile.default.eth_rpc_urls]
+mainnet = "${MAINNET_RPC_URL}"
+sepolia = "${SEPOLIA_RPC_URL}"
+anvil = "http://localhost:8545"
+
+[dependencies]
+forge-std = { package = "forge-std", version = "1.2.0", url = "https://github.com/foundry-rs/forge-std" }
+openzeppelin-contracts = { package = "openzeppelin-contracts", version = "5.0.2", url = "https://github.com/OpenZeppelin/openzeppelin-contracts" }
+solmate = { package = "solmate", version = "main", url = "https://github.com/transmissions11/solmate" }
+
